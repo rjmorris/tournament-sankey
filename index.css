@@ -1,0 +1,12 @@
+body {
+    margin: 10px;
+    background-color: #ffffff;
+    font-family: sans-serif;
+}
+
+path {
+    fill: none;
+    stroke: #000000;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+}
