@@ -80,6 +80,32 @@ d3.json("data.json", function(data) {
         return createYScale(round);
     }));
 
+    // Store the vertex points defining each game's funnel.
+    _.each(data, function(d) {
+        d.funnel = {
+                in: {
+                    top: {
+                        x: xScale(d.round),
+                        y: yScales[d.round]['in'](d.id)
+                    },
+                    bottom: {
+                        x: xScale(d.round),
+                        y: yScales[d.round]['in'](d.id) + yScales[d.round]['in'].bandwidth()
+                    }
+                },
+            out: {
+                top: {
+                    x: xScale(d.round) + xScale.bandwidth(),
+                    y: yScales[d.round]['out'](d.id)
+                },
+                bottom: {
+                    x: xScale(d.round) + xScale.bandwidth(),
+                    y: yScales[d.round]['out'](d.id) + yScales[d.round]['out'].bandwidth()
+                }
+            }
+        };
+    });
+
     var gameFunnels = chart.selectAll('.game-funnel')
         .data(data)
         .enter()
@@ -91,10 +117,10 @@ d3.json("data.json", function(data) {
         .append('path')
         .attr('d', function(d) {
             path = d3.path();
-            path.moveTo(xScale(d.round), yScales[d.round]['in'](d.id));
-            path.lineTo(xScale(d.round), yScales[d.round]['in'](d.id) + yScales[d.round]['in'].bandwidth());
-            path.lineTo(xScale(d.round) + xScale.bandwidth(), yScales[d.round]['out'](d.id) + yScales[d.round]['out'].bandwidth());
-            path.lineTo(xScale(d.round) + xScale.bandwidth(), yScales[d.round]['out'](d.id));
+            path.moveTo(d.funnel.in.top.x, d.funnel.in.top.y);
+            path.lineTo(d.funnel.in.bottom.x, d.funnel.in.bottom.y);
+            path.lineTo(d.funnel.out.bottom.x, d.funnel.out.bottom.y);
+            path.lineTo(d.funnel.out.top.x, d.funnel.out.top.y);
             path.closePath();
             return path.toString();
         })
