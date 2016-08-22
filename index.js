@@ -3,8 +3,9 @@ d3.json("data.json", function(data) {
     // Pre-process the data.
 
     // For easier game lookup, map the games IDs to game objects.
-    var gamesMap = _.groupBy(data, function(game) {
-        return game.id;
+    var gamesMap = {};
+    _.each(data, function(d) {
+        gamesMap[d.id] = d;
     });
 
     // Get the list of games in each round.
@@ -14,15 +15,35 @@ d3.json("data.json", function(data) {
 
     // Replace the IDs of connected games with the game objects.
     _.each(data, function(d) {
-        if (d.feeds) {
-            d.feeds = gamesMap[d.feeds];
+        if (d.toGame !== null) {
+            d.toGame = gamesMap[d.toGame];
         }
-        if (d.fedby) {
-            _.each(d.fedby, function(fedbyId, i) {
-                d.fedby[i] = gamesMap[fedbyId];
-            });
+        if (d.fromGame1 !== null) {
+            d.fromGame1 = gamesMap[d.fromGame1];
+        }
+        if (d.fromGame2 !== null) {
+            d.fromGame2 = gamesMap[d.fromGame2];
         }
     });
+
+    // Extract each pick into its own element of an array.
+    var picks = _.flatten(
+        _.map(data, function(d) {
+            var cumulativeProportion = 0;
+            return _.map(d.picks, function(proportion, team) {
+                var obj = {
+                    fromGame: d,
+                    toGame: d.toGame,
+                    topBracket: (d.toGame === null) ? false : d.toGame.fromGame1 === d,
+                    team: team,
+                    proportion: proportion,
+                    cumulativeProportion: cumulativeProportion
+                };
+                cumulativeProportion += obj.proportion;
+                return obj;
+            });
+        })
+    );
 
     var rounds = _.chain(data)
         .pluck('round')
@@ -123,6 +144,62 @@ d3.json("data.json", function(data) {
             path.lineTo(d.funnel.out.top.x, d.funnel.out.top.y);
             path.closePath();
             return path.toString();
+        })
+    ;
+
+    var pickFlows = chart.selectAll('.pick-flow')
+        .data(picks)
+        .enter()
+        .append('g')
+        .classed('pick-flow', true)
+    ;
+
+    pickFlows.append('rect')
+        .attr('x', function(d) {
+            return d.fromGame.funnel.out.top.x;
+        })
+        .attr('y', function(d) {
+            return d.fromGame.funnel.out.top.y + d.cumulativeProportion * (d.fromGame.funnel.out.bottom.y - d.fromGame.funnel.out.top.y);
+        })
+        .attr('width', function(d) {
+            return 1/3*xScale.bandwidth();
+        })
+        .attr('height', function(d) {
+            return d.proportion * (d.fromGame.funnel.out.bottom.y - d.fromGame.funnel.out.top.y);
+        })
+    ;
+
+    pickFlows.filter(function(d) {
+        return d.toGame !== null;
+    }).append('rect')
+        .attr('x', function(d) {
+            return d.toGame.funnel.in.top.x - 1/3*xScale.bandwidth();
+        })
+        .attr('y', function(d) {
+            return d.toGame.funnel.in.top.y + (!d.topBracket * 0.5 + d.cumulativeProportion / 2) * (d.toGame.funnel.in.bottom.y - d.toGame.funnel.in.top.y);
+        })
+        .attr('width', function(d) {
+            return 1/3*xScale.bandwidth();
+        })
+        .attr('height', function(d) {
+            return d.proportion * (d.toGame.funnel.in.bottom.y - d.toGame.funnel.in.top.y) / 2;
+        })
+    ;
+
+    pickFlows.filter(function(d) {
+        return d.toGame !== null;
+    }).append('line')
+        .attr('x1', function(d) {
+            return d.fromGame.funnel.out.top.x + 1/3*xScale.bandwidth();
+        })
+        .attr('y1', function(d) {
+            return d.fromGame.funnel.out.top.y + (d.cumulativeProportion + d.proportion / 2) * (d.fromGame.funnel.out.bottom.y - d.fromGame.funnel.out.top.y);
+        })
+        .attr('x2', function(d) {
+            return d.toGame.funnel.in.top.x - 1/3*xScale.bandwidth();
+        })
+        .attr('y2', function(d) {
+            return d.toGame.funnel.in.top.y + (!d.topBracket * 0.5 + d.cumulativeProportion / 2 + d.proportion / 4) * (d.toGame.funnel.in.bottom.y - d.toGame.funnel.in.top.y);
         })
     ;
 });

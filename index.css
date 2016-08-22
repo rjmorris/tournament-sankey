@@ -10,3 +10,18 @@ path {
     stroke-width: 1px;
     shape-rendering: crispEdges;
 }
+
+.pick-flow rect {
+    fill: none;
+    stroke: #000000;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+}
+
+.pick-flow line {
+    display: none;
+    fill: none;
+    stroke: #000000;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+}
