@@ -2,8 +2,8 @@
     {
         "id": 1,
         "round": 1,
-        "child": 5,
-        "parents": null,
+        "feeds": 5,
+        "fedby": null,
         "picks": {
             "Team 1": 1.0
         }
@@ -11,8 +11,8 @@
     {
         "id": 2,
         "round": 1,
-        "child": 5,
-        "parents": null,
+        "feeds": 5,
+        "fedby": null,
         "picks": {
             "Team 4": 0.6,
             "Team 5": 0.4
@@ -21,8 +21,8 @@
     {
         "id": 3,
         "round": 1,
-        "child": 6,
-        "parents": null,
+        "feeds": 6,
+        "fedby": null,
         "picks": {
             "Team 3": 0.5,
             "Team 6": 0.5
@@ -31,8 +31,8 @@
     {
         "id": 4,
         "round": 1,
-        "child": 6,
-        "parents": null,
+        "feeds": 6,
+        "fedby": null,
         "picks": {
             "Team 2": 0.8,
             "Team 7": 0.2
@@ -41,8 +41,8 @@
     {
         "id": 5,
         "round": 2,
-        "child": 7,
-        "parents": [1, 2],
+        "feeds": 7,
+        "fedby": [1, 2],
         "picks": {
             "Team 1": 0.7,
             "Team 4": 0.2,
@@ -52,8 +52,8 @@
     {
         "id": 6,
         "round": 2,
-        "child": 7,
-        "parents": [3, 4],
+        "feeds": 7,
+        "fedby": [3, 4],
         "picks": {
             "Team 2": 0.5,
             "Team 3": 0.3,
@@ -64,8 +64,8 @@
     {
         "id": 7,
         "round": 3,
-        "child": null,
-        "parents": [5, 6],
+        "feeds": null,
+        "fedby": [5, 6],
         "picks": {
             "Team 1": 0.4,
             "Team 3": 0.3,

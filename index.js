@@ -1,4 +1,41 @@
 d3.json("data.json", function(data) {
+    //==========================================================================
+    // Pre-process the data.
+
+    // For easier game lookup, map the games IDs to game objects.
+    var gamesMap = _.groupBy(data, function(game) {
+        return game.id;
+    });
+
+    // Get the list of games in each round.
+    var gamesByRound = _.groupBy(data, function(game) {
+        return game.round;
+    });
+
+    // Replace the IDs of connected games with the game objects.
+    _.each(data, function(d) {
+        if (d.feeds) {
+            d.feeds = gamesMap[d.feeds];
+        }
+        if (d.fedby) {
+            _.each(d.fedby, function(fedbyId, i) {
+                d.fedby[i] = gamesMap[fedbyId];
+            });
+        }
+    });
+
+    var rounds = _.chain(data)
+        .pluck('round')
+        .uniq()
+        .value()
+    ;
+
+    var numRounds = rounds.length;
+
+
+    //==========================================================================
+    // Create the graphic elements.
+
     var margin = {
         top: 10,
         right: 10,
@@ -16,18 +53,6 @@ d3.json("data.json", function(data) {
     var chart = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
     ;
-
-    var rounds = _.chain(data)
-        .pluck('round')
-        .uniq()
-        .value()
-    ;
-
-    var numRounds = rounds.length;
-
-    var gamesByRound = _.groupBy(data, function(game) {
-        return game.round;
-    });
 
     var xScale = d3.scaleBand()
         .domain(rounds)
