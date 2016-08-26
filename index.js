@@ -1,8 +1,21 @@
-d3.json("data.json", function(data) {
+d3.queue()
+    .defer(d3.csv, 'teams.csv')
+    .defer(d3.json, 'data.json')
+    .await(createDiagram)
+;
+
+function createDiagram(error, teams, data) {
+
     //==========================================================================
     // Pre-process the data.
 
-    // For easier game lookup, map the games IDs to game objects.
+    // For easier team lookups, map the team IDs to team objects.
+    var teamsMap = {};
+    _.each(teams, function(d) {
+        teamsMap[d.team] = d;
+    });
+
+    // For easier game lookups, map the games IDs to game objects.
     var gamesMap = {};
     _.each(data, function(d) {
         gamesMap[d.id] = d;
@@ -168,6 +181,9 @@ d3.json("data.json", function(data) {
         .attr('height', function(d) {
             return d.proportion * (d.fromGame.funnel.out.bottom.y - d.fromGame.funnel.out.top.y);
         })
+        .style('fill', function(d) {
+            return teamsMap[d.team].color;
+        })
     ;
 
     pickFlows.filter(function(d) {
@@ -184,6 +200,9 @@ d3.json("data.json", function(data) {
         })
         .attr('height', function(d) {
             return d.proportion * (d.toGame.funnel.in.bottom.y - d.toGame.funnel.in.top.y) / 2;
+        })
+        .style('fill', function(d) {
+            return teamsMap[d.team].color;
         })
     ;
 
@@ -202,5 +221,8 @@ d3.json("data.json", function(data) {
         .attr('y2', function(d) {
             return d.toGame.funnel.in.top.y + (!d.topBracket * 0.5 + d.cumulativeProportion / 2 + d.proportion / 4) * (d.toGame.funnel.in.bottom.y - d.toGame.funnel.in.top.y);
         })
+        .style('stroke', function(d) {
+            return teamsMap[d.team].color;
+        })
     ;
-});
+}
