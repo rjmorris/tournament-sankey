@@ -79,6 +79,11 @@ function createDiagram(error, teams, data) {
     var width = 800 - margin.left - margin.right;
     var height = 800 - margin.top - margin.bottom;
 
+
+    var relativeFunnelWidth = 0.2;
+    var relativeOutFlowWidth = 0.2;
+    var relativeInFlowWidth = 0.2;
+
     var svg = d3.select("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -91,8 +96,8 @@ function createDiagram(error, teams, data) {
     var xScale = d3.scaleBand()
         .domain(rounds)
         .range([0,width])
-        .paddingInner(0.5)
-        .paddingOuter(0.25)
+        .paddingInner(1 - relativeFunnelWidth)
+        .paddingOuter(Math.max(relativeInFlowWidth, relativeOutFlowWidth))
     ;
 
     function createYScale(round) {
@@ -176,7 +181,7 @@ function createDiagram(error, teams, data) {
             return d.fromGame.funnel.out.top.y + d.cumulativeProportion * (d.fromGame.funnel.out.bottom.y - d.fromGame.funnel.out.top.y);
         })
         .attr('width', function(d) {
-            return 1/3*xScale.bandwidth();
+            return (relativeOutFlowWidth / relativeFunnelWidth) * xScale.bandwidth();
         })
         .attr('height', function(d) {
             return d.proportion * (d.fromGame.funnel.out.bottom.y - d.fromGame.funnel.out.top.y);
@@ -190,13 +195,13 @@ function createDiagram(error, teams, data) {
         return d.toGame !== null;
     }).append('rect')
         .attr('x', function(d) {
-            return d.toGame.funnel.in.top.x - 1/3*xScale.bandwidth();
+            return d.toGame.funnel.in.top.x - (relativeInFlowWidth / relativeFunnelWidth) * xScale.bandwidth();
         })
         .attr('y', function(d) {
             return d.toGame.funnel.in.top.y + (!d.topBracket * 0.5 + d.cumulativeProportion / 2) * (d.toGame.funnel.in.bottom.y - d.toGame.funnel.in.top.y);
         })
         .attr('width', function(d) {
-            return 1/3*xScale.bandwidth();
+            return (relativeInFlowWidth / relativeFunnelWidth) * xScale.bandwidth();
         })
         .attr('height', function(d) {
             return d.proportion * (d.toGame.funnel.in.bottom.y - d.toGame.funnel.in.top.y) / 2;
