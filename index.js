@@ -79,6 +79,7 @@ d3.json("data.json", function(data) {
         .domain(rounds)
         .range([0,width])
         .paddingInner(0.5)
+        .paddingOuter(0.25)
     ;
 
     function createYScale(round) {
